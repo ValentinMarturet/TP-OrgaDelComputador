@@ -2,9 +2,9 @@
 
 ## Integrantes
 
-**Integrante 1** - [Marturet, Valentín](https://github.com/ValentinMarturet)
-**Integrante 2** - [Integrante 2](https://github.com/ValentinMarturet/TP-OrgaDelComputador)
-**Integrante 3** - [Integrante 3](https://github.com/ValentinMarturet/TP-OrgaDelComputador)
+* **Integrante 1** - [Marturet, Valentín](https://github.com/ValentinMarturet)
+* **Integrante 2** - [Integrante 2](https://github.com/ValentinMarturet/TP-OrgaDelComputador)
+* **Integrante 3** - [Integrante 3](https://github.com/ValentinMarturet/TP-OrgaDelComputador)
 
 
 ## El Zorro y las Ocas
