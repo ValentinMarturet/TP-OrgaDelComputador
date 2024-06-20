@@ -4,11 +4,18 @@
     call    printf
     add     rsp,8
 %endmacro
+%macro mGets 1
+    mov     rdi,%1
+    sub     rsp,8
+    call    gets
+    add     rsp,8
+%endmacro
 
 global main
 
 ;funciones externas de C
 extern printf
+extern gets
 
 
 
@@ -17,12 +24,16 @@ section .data
 
 
 section .bss
+    auxIngreso  resb 20 ;Guarda el ultimo ingreso por teclado
 
 
 section .text
 main:
     mPrintf     msjInicioDelJuego
 
+    mGets       auxIngreso
+
+    mPrintf     auxIngreso
 
 
 
