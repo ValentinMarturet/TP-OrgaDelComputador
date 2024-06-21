@@ -16,7 +16,7 @@ global main
 ;funciones externas de C
 extern printf
 extern gets
-
+extern imprimirTablero
 
 
 section .data
@@ -33,6 +33,28 @@ section .data
     opcionSalirJuego    db "2",0
 
     turnoActual         db "O"
+
+    CANT_FILAS       equ 7
+    CANT_COLUMNAS    equ 7
+    
+    tablero     db -1, -1, 1, 1, 1, -1, -1
+                db -1, -1, 1, 1, 1, -1, -1
+                db  1,  1, 1, 1, 1,  1,  1
+                db  1,  0, 0, 0, 0,  0,  1
+                db  1,  0, 0, 2, 0,  0,  1
+                db -1, -1, 0, 0, 0, -1, -1
+                db -1, -1, 0, 0, 0, -1, -1
+
+    simboloZorro    db "O"
+    simboloOca      db "X"
+
+    rows equ 7
+    cols equ 7
+
+    newline db 10, 0      ; newline character
+    empty_space db '.', 0 ; empty space character
+    goose db 'O', 0       ; goose character
+    fox db 'X', 0         ; fox character
 
 
 section .bss
@@ -80,35 +102,38 @@ comienzoNuevaPartida:
     mPrintf     msjComienzoNuevaPartida
 
     ;Esto se puede loopear
+    mov rdi, tablero
+    sub rsp, 8
     call        imprimirTablero
+    add rsp,8
 
-    principioLoop:
-    call        preguntarPorMovimientoAlZorro
-
-    call        validarMovimientoDelZorro
-
-    cmp         rax,-1
-    je          principioLoop
-
-
-    call        realizarMovimientoDelZorro
-
-    call        verificaCondicionDeFinDePartida
-
-    ;fin del loop
-
-
-
-
-    call        imprimirTablero
-
-    call        preguntarPorMovimientoAOca
-
-    call        validarMovimientoDeOca
-
-    call        realizarMovimientoDeOca
-
-    call        verificaCondicionDeFinDePartida
+;    principioLoop:
+;    call        preguntarPorMovimientoAlZorro
+;
+;    call        validarMovimientoDelZorro
+;
+;    cmp         rax,-1
+;    je          principioLoop
+;
+;
+;    call        realizarMovimientoDelZorro
+;
+;    call        verificaCondicionDeFinDePartida
+;
+;    ;fin del loop
+;
+;
+;
+;
+;    call        imprimirTablero
+;
+;    call        preguntarPorMovimientoAOca
+;
+;    call        validarMovimientoDeOca
+;
+;    call        realizarMovimientoDeOca
+;
+;    call        verificaCondicionDeFinDePartida
 
 
 
