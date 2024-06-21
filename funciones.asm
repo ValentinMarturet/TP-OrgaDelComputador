@@ -1,4 +1,6 @@
 global imprimirTablero
+global realizarMovimientoDelZorro
+
 
 %macro mprintf 1
     mov     rdi,%1
@@ -24,6 +26,9 @@ section .data
     longitudElemento dq 1
     longitudFila dq 7
     longitudColumna dq 7
+
+    caracterZorro db 90 
+    caracterEspacio db 32
 
 section .bss
     dirVec      resq   1
@@ -51,9 +56,9 @@ imprimirTablero: ; Parametros: rdi -> direccion del tablero
         inc rax
         mprintf formatoFila, rax
 
-        mov rax,qword[indiceFila] ;me desplazo de fila
+        mov rax,qword[indiceFila] 
         imul rax, qword[longitudFila] 
-        mov [tableroOffset], rax 
+        mov [tableroOffset], rax ;me guardo cuanto tengo que desplazarme para llegar a esta
 
         mov qword[indiceColumna],0 ;reseteo indice de columna e incremento el de fila
         inc qword[indiceFila]
@@ -85,4 +90,37 @@ imprimirTablero: ; Parametros: rdi -> direccion del tablero
 
     ret
 
-realizarMovimientoDelZorro:
+realizarMovimientoDelZorro: ; Parametros: rdi -> direccion del tablero
+                            ;             rsi -> Direccion vertical
+                            ;             rdx -> Direccion horizontal
+
+
+    buscarZorroEnTablero:
+        mov qword[dirVec], rdi
+        mov rcx, rsi
+        mov rax, [dirVec]
+
+    proximoCasillero:
+        cmp     byte[rax], 90
+        je      escribirCasilleroActual
+        inc     rax ; asumiendo longitud elemento = 1
+        jmp     proximoCasillero
+
+    escribirCasilleroActual:
+
+        mov byte[rax], 32
+
+    escribirCasilleroNuevo:
+        imul rcx, [longitudFila]  
+        add rax, rcx
+ 
+        add rax, rdx
+
+        cmp rax, 0
+        je terminarMovimiento
+
+        mov byte[rax], 90
+        
+
+    terminarMovimiento:
+    ret

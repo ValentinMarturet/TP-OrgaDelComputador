@@ -18,6 +18,7 @@ extern printf
 extern gets
 
 extern imprimirTablero
+extern realizarMovimientoDelZorro
 
 
 section .data
@@ -109,8 +110,19 @@ comienzoNuevaPartida:
     cmp         rax,-1
     je          principioLoop
 
+    mov     rdi, MatrizTablero
+    mov     rsi, 1
+    mov     rdx, -1
 
-    ;call        realizarMovimientoDelZorro
+    sub     rsp,8
+    call        realizarMovimientoDelZorro
+    add     rsp,8
+
+    mov     rdi, MatrizTablero
+    sub     rsp,8
+    call        imprimirTablero
+    add     rsp,8
+
 
     ;call        verificaCondicionDeFinDePartida
 
