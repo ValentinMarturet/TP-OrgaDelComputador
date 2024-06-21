@@ -27,14 +27,6 @@ extern printf
 %endmacro
 
 section .data
-    tablero     db -1, -1, 1, 1, 1, -1, -1
-                db -1, -1, 1, 1, 1, -1, -1
-                db  1,  1, 1, 1, 1,  1,  1
-                db  1,  0, 0, 0, 0,  0,  1
-                db  1,  0, 0, 2, 0,  0,  1
-                db -1, -1, 0, 0, 0, -1, -1
-                db -1, -1, 0, 0, 0, -1, -1
-
     CANT_FILAS      equ 7
     CANT_COLUMNAS   equ 7
     msjLinea        db "|---+---+---+---+---+---+---|", 10,13,0
@@ -65,12 +57,16 @@ imprimirFila:
 loopImprimirColumna:
     cmp qword [columnaActual], CANT_COLUMNAS
     je imprimirSiguienteFila
-
+    
     ; Calculate the offset for the current element
+    mov rdx, qword[dirTablero]; Me situo al inicio del tablero
+    
     mov rax, qword [filaActual]
     imul rax, CANT_COLUMNAS
-    add rax, qword [columnaActual]
-    movsx rbx, byte [tablero + rax]
+    add rax, qword[columnaActual]
+    
+    add rdx, rax ;me posicione en la matriz
+    movsx rbx, byte[rdx]
 
     ; Determine the character to print based on the element value
     cmp rbx, -1
