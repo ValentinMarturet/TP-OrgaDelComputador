@@ -5,10 +5,13 @@ CFLAGS= -no-pie -g
 
 all: juego 
 
-juego: juego.o
-	$(CC) juego.o -o juego $(CFLAGS)
+juego: juego.o funciones.o
+	$(CC) juego.o funciones.o -o juego $(CFLAGS)
 
 juego.o: juego.asm
 	$(AS) juego.asm $(ASFLAGS)
+
+funciones.o: funciones.asm
+	$(AS) funciones.asm $(ASFLAGS)
 
 clean: rm -f juego

@@ -17,9 +17,20 @@ global main
 extern printf
 extern gets
 
+extern imprimirTablero
 
 
 section .data
+
+    ;Logica del juego
+    MatrizTablero db "XXOOOXX"
+     f1         db   "XXOOOXX"
+     f2         db   "OOOOOOO"
+     f3         db   "O     O"
+     f4         db   "O  Z  O"
+     f5         db   "XX   XX"
+     f6         db   "XX   XX"
+
     ;Mensajes
     msjInicioDelJuego           db "--EL ZORRO Y LAS OCAS",10,10,"Elija una opcion para jugar",10,"1 - Nueva Partida",10,"2 - Salir del juego",10,0
     msjComienzoNuevaPartida     db "Usted ha comenzado una nueva partida.",10,0
@@ -27,6 +38,9 @@ section .data
 
 
     msjErrorDeValidacion        db "No se pudo validar ninguna de las opciones",10,0
+
+    msjPedirMovimientoZorro     db "S.",10,0
+
 
     ;opciones de la partida
     opcionNuevaPartida  db "1",0
@@ -80,35 +94,40 @@ comienzoNuevaPartida:
     mPrintf     msjComienzoNuevaPartida
 
     ;Esto se puede loopear
+
+    mov     rdi, MatrizTablero
+    sub     rsp,8
     call        imprimirTablero
-
+    add     rsp,8
+    
+    
     principioLoop:
-    call        preguntarPorMovimientoAlZorro
+    ;call        preguntarPorMovimientoAlZorro
 
-    call        validarMovimientoDelZorro
+    ;call        validarMovimientoDelZorro
 
     cmp         rax,-1
     je          principioLoop
 
 
-    call        realizarMovimientoDelZorro
+    ;call        realizarMovimientoDelZorro
 
-    call        verificaCondicionDeFinDePartida
+    ;call        verificaCondicionDeFinDePartida
 
     ;fin del loop
 
 
 
 
-    call        imprimirTablero
+    ;call        imprimirTablero
 
-    call        preguntarPorMovimientoAOca
+    ;call        preguntarPorMovimientoAOca
 
-    call        validarMovimientoDeOca
+    ;call        validarMovimientoDeOca
 
-    call        realizarMovimientoDeOca
+    ;call        realizarMovimientoDeOca
 
-    call        verificaCondicionDeFinDePartida
+    ;call        verificaCondicionDeFinDePartida
 
 
 
