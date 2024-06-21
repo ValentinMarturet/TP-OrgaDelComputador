@@ -12,6 +12,10 @@
 El juego se desarrolla en un tablero con treinta y tres hendiduras, dispuesta en forma de cruz.
 Diescisiete piezas redondas, semejantes a las canicas, de un mismo color, que representarán a las ocas; y otra distinta, que será el zorro.
 
+<div align="center">
+    <img width="70%" src="img/ejTablero.png">
+</div>
+
 ### Objetivo
 
 El jugador que se halla en posesión del zorro tiene como objetivo capturar un mínimo de doce ocas, mediante movimientos sucesivos muy parecidos a los que se realizan en el juego de damas. Su oponente deberá evitarlo.
@@ -27,3 +31,14 @@ Las partidas se disputan entre dos jugadores. Uno de ellos dispone de una sola p
 - Las ocas pueden moverse hacia adelante y hacia los lados, pero nunca en diagonal o hacia atrás (una casilla a la vez). Como no pueden saltar por encima del zorro, tiene que intentar acorralarle para que no pueda mover. Toda oca cazada es apartada del tablero
 - En un movimiento por turno y solamente puede moverse una pieza por vez.
 - El zorro ganará el juego si consigue cazar un minimo de doce ocas.
+
+### Como correr compilar
+1. Tener instalado el paquete ```make```
+2. Correr el comando: 
+```sh
+make
+```
+3. Correr el comando
+```sh
+./juego
+```
