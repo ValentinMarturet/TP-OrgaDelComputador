@@ -20,11 +20,20 @@
     add     rsp,8
 %endmacro
 
+; Recibe un string por parametro y devuelve en rax el largo del string.
+%macro mStrlen 1
+    mov     rdi, %1
+    sub     rsp, 8
+    call    strlen
+    add     rsp,8
+%endmacro
+
 global main
 
 ;funciones externas de C
 extern printf
 extern gets
+extern strlen
 
 extern imprimirTablero
 extern realizarMovimientoDelZorro
@@ -53,13 +62,14 @@ section .data
     msjMovimientosZorro         db "1. arriba", 10, "2. arriba derecha", 10, "3. derecha", 10, "4. abajo derecha", 10, "5. abajo", 10, "6. abajo izquierda", 10, "7. izquierda", 10, "8. arriba izquierda", 10, "S. Salir del juego", 10 ,0
 
     msjTurnoOca                 db "<========== Turno Oca ==========>", 10,0
-    msjMovimientosOca           db "1. derecha", 10, "2. abajo", 10, "3. izquierda", 10,"S. Salir del juego",10,0
-
+    msjMovimientosOca           db "1. derecha", 10, "2. abajo", 10, "3. izquierda",10, "4. Elegir otra oca",10,"S. Salir del juego",10,0
+    msjPedirCoordenadaOca       db "Ingresa coordenada de la OCA a mover o 'S' para salir: ",0
     msjPedirOpcion              db "Elija una opcion: ", 0
 
     msjValidacion       db "Validacion mov", 10, 0
     msjJugadaIngresada  db "Jugada ingresada: %c", 10, 0
 
+    msjCoordenadaInvalida   db "Coordenada invalida.",10,0
     ;opciones de la partida
     opcionNuevaPartida  db "1",0
     opcionSalirJuego    db "2",0
@@ -134,7 +144,7 @@ principioLoop:
     ;Si el turno actual es de la OCA, salta a preguntarPorMovimientoAOca
     mov al, [turnoActual]
     cmp al, 'O'
-    je preguntarPorMovimientoAOca
+    je preguntarPorCoordenadaOca
 
     preguntarPorMovimientoAlZorro:
         mPrintf msjTurnoZorro
@@ -178,6 +188,35 @@ principioLoop:
     jmp principioLoop
 
 
+    preguntarPorCoordenadaOca:
+        mPrintf msjTurnoOca
+        mPrintf msjPedirCoordenadaOca
+
+        mGets auxIngreso
+        mov     al, [auxIngreso]
+        mov     [auxValidacion],al
+
+        ; Si el input es 'S', salgo del juego
+        mov     al,[opcionSalirJuego2]
+        cmp     al,[auxValidacion]
+        je      salirDelJuego
+
+        ; Si el input es 's', salgo del juego
+        mov     al,[opcionSalirJuego3]
+        cmp     al,[auxValidacion]
+        je      salirDelJuego
+
+        validarCoordenadaOca:
+            mStrlen auxIngreso              ;Valido que el input sea 2 caracteres
+            cmp     rax, 2
+            je      preguntarPorMovimientoAOca
+        
+            ;Validar que haya una oca, en la coordenada ingresada.
+
+        coordenadaInvalida:
+            mPrintf msjCoordenadaInvalida
+            jmp     preguntarPorCoordenadaOca
+
     preguntarPorMovimientoAOca:
         mPrintf msjTurnoOca
         mPrintf msjMovimientosOca
@@ -186,6 +225,9 @@ principioLoop:
         mGets auxIngreso
         mov     al, [auxIngreso]
         mov     [auxValidacion],al
+
+        cmp     al, '4'
+        je      preguntarPorCoordenadaOca
 
         ; Si el input es 'S', salgo del juego
         mov     al,[opcionSalirJuego2]
@@ -202,6 +244,7 @@ principioLoop:
         call        validarMovimientoDeOca ;Valida el movimiento de la oca, si es un movimiento invalido setea rax en -1.
         add rsp, 8
 
+ 
 
     ; cmp rax, -1                       ; Verificar si el movimiento de la oca fue invalido
     ;jmp preguntarPorMovimientosOca     ; Vuelvo a preguntar movimiento
@@ -231,7 +274,7 @@ principioLoop:
     ;call        verificaCondicionDeFinDePartida
 
     mov byte[turnoActual], 'Z'      ;Cuando termina el turno de la Oca, cambia el turno al zorro.
-    
+
     jmp principioLoop
 
 calcularPosicionZorro:
