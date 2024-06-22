@@ -136,6 +136,7 @@ validarMovimientoEstaDentroDelTablero:
         mov     rax,0
         ret
 
+;Valida si el input ingresado por el usuario es una de las opciones disponibles. 1-4 para la oca, 1-8 para el zorro
 validarOpcionMovimientoEsValido: ; Parametros: dil -> opcion elegida
                          ;             sil -> 0 si es oca, 1 si es zorro    
                          ; Devuelve en al 0 si es valido y -1 si no

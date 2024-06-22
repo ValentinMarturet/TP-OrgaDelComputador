@@ -35,8 +35,8 @@ section .data
     caracterZorro db 90 
     caracterEspacio db 32
 
-    tablaCoordenadasVerticalesZorro db -1,-1,0,1,1,1,0,-1
-    tablaCoordenadasHorizontalesZorro db 0, 1, 1, 1, 0, -1, -1, -1
+    tablaCoordenadasVerticalesZorro     db -1,-1, 0, 1, 1,  1,  0, -1
+    tablaCoordenadasHorizontalesZorro   db  0, 1, 1, 1, 0, -1, -1, -1
 
     tablaCoordenadasVerticalesOca db 0, 1, 0
     tablaCoordenadasHorizontalesOca db 1, 0, -1
@@ -106,7 +106,10 @@ imprimirTablero: ; Parametros: rdi -> direccion del tablero
 realizarMovimientoDelZorro: ; Parametros: rdi -> direccion del tablero
                             ;             sil -> mov horizontal
                             ;             dl _> mov vertical
-
+                            ; Devuelve:
+                            ; -1 si fallo
+                            ; 0 si se movio 
+                            ; 1 si comio una oca
 
     buscarZorroEnTablero:
         mov qword[dirVec], rdi
@@ -114,21 +117,53 @@ realizarMovimientoDelZorro: ; Parametros: rdi -> direccion del tablero
         movsx rdx, dl
 
         mov rax, [dirVec]
+        imul rdx, [longitudFila]            ;Desplazamiento filas
 
-    proximoCasillero:
+    proximoCasillero:                           ;Guarda en rax la posicion del zorro
         cmp     byte[rax], 90
-        je      escribirCasilleroActual
+        je      verificarSiHayOca
         inc     rax ; asumiendo longitud elemento = 1
         jmp     proximoCasillero
+
+    verificarSiHayOca:
+        mov     r10b, 0                         ;Variable para luego ver si se comio a una oca
+        mov     r8, rax                         ;Copio la posicion del zorro
+        add     r8, rdx                         ;Sumo desplazamiento filas
+        add     r8, rcx                         ;Sumo desplazamiento columnas
+
+        cmp     byte[r8], 'X'
+        je      movimientoInvalido
+
+        cmp     byte[r8], 'O'
+        je      validarSiguienteCelda
+
+        jmp     escribirCasilleroActual
+
+    validarSiguienteCelda:
+        mov     r9, r8
+        add     r9, rdx
+        add     r9, rcx
+        
+        cmp     byte[r9], ' '
+        jne     movimientoInvalido
+
+        mov     r10b, 1                     ;Guardo 1 si se comio una oca
 
     escribirCasilleroActual:
 
         mov byte[rax], 32
 
     escribirCasilleroNuevo:
-        imul rdx, [longitudFila]  
-        add rax, rdx
- 
+        cmp r10b, 1
+        jne  escribirProximoCasillero
+
+        escribirCasillerosOcaComida:
+            mov byte[r8], ' '
+            mov byte[r9], 'Z'
+            jmp terminarMovimiento
+            
+        escribirProximoCasillero:
+        add rax, rdx                         
         add rax, rcx
 
         cmp rax, 0
@@ -138,6 +173,7 @@ realizarMovimientoDelZorro: ; Parametros: rdi -> direccion del tablero
         
 
     terminarMovimiento:
+        movsx rax, r10b
     ret
 
 realizarMovimientoDeOca: ; Parametros: rdi -> direccion del tablero

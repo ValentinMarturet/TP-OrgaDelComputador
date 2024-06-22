@@ -77,12 +77,10 @@ section .data
     msjPedirCoordenadaOca       db "Ingresa coordenada de la OCA a mover o 'S' para salir: ",0
     msjPedirOpcion              db "Elija una opcion: ", 0
 
-    msjValidacion       db "Validacion mov", 10, 0
-    msjJugadaIngresada  db "Jugada ingresada: %c", 10, 0
-
     msjCoordenadaInvalida   db "Coordenada invalida.",10,0
     msjOpcionInvalida   db "Opcion invalida.",10,0
-
+    msjMovimientoInvalido   db "Movimiento invalido!!!", 10, 0
+    msjOcaComida            db "Oca comida! Tienes otro turno!", 10 ,0
     ;opciones de la partida
     opcionNuevaPartida  db "1",0
     opcionSalirJuego    db "2",0
@@ -194,12 +192,6 @@ principioLoop:
         call        obtenerDireccionDeMovimiento
         add     rsp,8
 
-;        sub rsp, 8
-;        call        validarMovimientoDelZorro ;Valida el movimiento del zorro, si es un movimiento invalido setea rax en -1.
-;        add rsp, 8
-
-;    cmp         rax,-1                     ; Si el movimiento fue invalido, vuelvo a preguntar por movimiento
-;    jmp     preguntarPorMovimientoAlZorro
     
     computarMovimiento:
         mov     rdi, MatrizTablero
@@ -210,9 +202,21 @@ principioLoop:
         call        realizarMovimientoDelZorro
         add     rsp,8
 
+        cmp     rax, -1
+        je      movimientoInvalido
+
+        cmp     rax,1
+        je      ocaComida
+        
     ;call        verificaCondicionDeFinDePartida
 
     mov byte[turnoActual], 'O' ;Si termina el turno del zorro, cambio el turno a la Oca
+    jmp finTurno
+    
+    ocaComida:
+        mPrintf msjOcaComida
+
+    finTurno:
     jmp principioLoop
 
 
@@ -299,8 +303,6 @@ principioLoop:
 
     computarMovimientoOca: 
 
-    ; cmp rax, -1                       ; Verificar si el movimiento de la oca fue invalido
-    ;jmp preguntarPorMovimientosOca     ; Vuelvo a preguntar movimiento
 
     mov     rdi, MatrizTablero
     mov     rsi, coordenadaOca
@@ -318,13 +320,14 @@ principioLoop:
     jmp principioLoop
 
 calcularPosicionZorro:
-    mPrintf msjValidacion
     ret
 
-validarMovimientoDelZorro:
-    mPrintf msjValidacion
-    ret
+movimientoInvalido:
+    mPrintf msjMovimientoInvalido
+    jmp principioLoop
+
+ret
 
 validarMovimientoDeOca:
-    mPrintf msjValidacion
+    
     ret
