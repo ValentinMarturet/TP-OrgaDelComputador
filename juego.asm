@@ -19,7 +19,7 @@ extern gets
 
 extern imprimirTablero
 extern realizarMovimientoDelZorro
-
+extern realizarMovimientoDeOca
 
 section .data
 
@@ -48,6 +48,9 @@ section .data
     opcionSalirJuego    db "2",0
 
     turnoActual         db "O"
+
+    coordenadaHardcodeada db "D3",0
+    coordenadaHardcodeada2 db "A4",0
 
 
 section .bss
@@ -137,7 +140,32 @@ comienzoNuevaPartida:
 
     ;call        validarMovimientoDeOca
 
-    ;call        realizarMovimientoDeOca
+    mov     rdi, MatrizTablero
+    mov     rsi, coordenadaHardcodeada
+    mov     rdx, 0
+     
+    sub     rsp,8
+    call        realizarMovimientoDeOca
+    add     rsp,8
+
+    mov     rdi, MatrizTablero
+    sub     rsp,8
+    call        imprimirTablero
+    add     rsp,8
+
+
+    mov     rdi, MatrizTablero
+    mov     rsi, coordenadaHardcodeada2
+    mov     rdx, 1
+     
+    sub     rsp,8
+    call        realizarMovimientoDeOca
+    add     rsp,8
+
+    mov     rdi, MatrizTablero
+    sub     rsp,8
+    call        imprimirTablero
+    add     rsp,8
 
     ;call        verificaCondicionDeFinDePartida
 

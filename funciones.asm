@@ -1,6 +1,7 @@
 global imprimirTablero
 global realizarMovimientoDelZorro
 
+global realizarMovimientoDeOca
 
 %macro mprintf 1
     mov     rdi,%1
@@ -20,7 +21,9 @@ extern printf
 section .data
     msgCoordenadasColumna db "   A B C D E F G",10,0  
     formatoElemento db "%c ",0
-    formatoFila db "%d  ",0
+    formatoFila db "%li  ",0
+    formatoByte db "%hhi  ",0
+
     msgSaltoDeLinea db "",10,0
     
     longitudElemento dq 1
@@ -91,8 +94,8 @@ imprimirTablero: ; Parametros: rdi -> direccion del tablero
     ret
 
 realizarMovimientoDelZorro: ; Parametros: rdi -> direccion del tablero
-                            ;             rsi -> Direccion vertical
-                            ;             rdx -> Direccion horizontal
+                            ;             rsi -> coordenada
+                            ;             
 
 
     buscarZorroEnTablero:
@@ -123,4 +126,51 @@ realizarMovimientoDelZorro: ; Parametros: rdi -> direccion del tablero
         
 
     terminarMovimiento:
+    ret
+
+realizarMovimientoDeOca: ; Parametros: rdi -> direccion del tablero
+                         ;             rsi -> coordenada de la oca
+                         ;             rdx -> direccion horizontal
+                         ; Devuelve
+                         
+    mov qword[dirVec], rdi
+
+obtenerDireccionOca:    
+    mov rax, 0
+    mov rcx, 0
+    
+    mov al, byte[rsi]
+    sub rax, 65
+
+    inc rsi
+    mov cl, byte[rsi]
+
+    sub rcx, 49
+    imul rcx, [longitudFila]
+
+    add rax, rcx
+    
+    add rax, [dirVec]
+
+    cmp byte[rax], 79 ;No es una oca
+    jne movimientoInvalido
+
+    mov byte[rax], 32
+
+    cmp rdx, 0 ; Si el movimiento horizontal es cero se mueve para adelante
+    je ocaMovimientoVertical
+
+    add rax, rdx
+    mov byte[rax], 79
+    ret
+
+
+ocaMovimientoVertical:
+    add rax, [longitudFila]
+    mov byte[rax], 79
+
+    ret
+
+movimientoInvalido:
+    mov rax, -1
     ret
