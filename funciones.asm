@@ -16,7 +16,7 @@ global imprimirTablero
 extern printf
 
 section .data
-    msgCoordenadasColumna db "   A B C D E F G",10,0  
+    msgCoordenadasColumna db 10,"   A B C D E F G",10,0  
     formatoElemento db "%c ",0
     formatoFila db "%d  ",0
     msgSaltoDeLinea db "",10,0
