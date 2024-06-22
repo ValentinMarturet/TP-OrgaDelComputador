@@ -1,4 +1,5 @@
 global validarMovimientoEstaDentroDelTablero
+global validarOpcionMovimientoEsValido
 
 %macro mPrintf 1
     mov     rdi,%1
@@ -134,3 +135,33 @@ validarMovimientoEstaDentroDelTablero:
 
         mov     rax,0
         ret
+
+validarOpcionMovimientoEsValido: ; Parametros: dil -> opcion elegida
+                         ;             sil -> 0 si es oca, 1 si es zorro    
+                         ; Devuelve en al 0 si es valido y -1 si no
+
+    sub dil, '0'
+
+    mov al, 0
+    mov dl, 4 ; Valor para la oca
+
+    cmp sil, 0
+    je validarOpcionMovimientoEsEnRango
+
+    mov dl, 8 ; Valor para el zorro
+
+    validarOpcionMovimientoEsEnRango:
+
+        cmp dil, dl
+        jg validarOpcionMovimientoEsValidoResultadoInvalido
+
+        cmp dil, 1
+        jl validarOpcionMovimientoEsValidoResultadoInvalido
+
+        ret ; Opcion valida
+
+    validarOpcionMovimientoEsValidoResultadoInvalido:
+        mov al, -1
+    
+    ret ; Opcion invalida
+

@@ -3,6 +3,8 @@ global realizarMovimientoDelZorro
 
 global realizarMovimientoDeOca
 
+global obtenerDireccionDeMovimiento
+
 %macro mprintf 1
     mov     rdi,%1
     sub     rsp,8
@@ -23,7 +25,7 @@ section .data
     formatoElemento db "%c ",0
     formatoFila db "%li  ",0
     formatoByte db "%hhi  ",0
-
+    formatoString db "%s",10,0
     msgSaltoDeLinea db "",10,0
     
     longitudElemento dq 1
@@ -33,11 +35,19 @@ section .data
     caracterZorro db 90 
     caracterEspacio db 32
 
+    tablaCoordenadasVerticalesZorro db -1,-1,0,1,1,1,0,-1
+    tablaCoordenadasHorizontalesZorro db 0, 1, 1, 1, 0, -1, -1, -1
+
+    tablaCoordenadasVerticalesOca db 0, 1, 0
+    tablaCoordenadasHorizontalesOca db 1, 0, -1
+
 section .bss
     dirVec      resq   1
     indiceColumna resq 1
     indiceFila resq 1
     tableroOffset resq 1
+
+    auxbyte2long resq 1
 
 section .text
 
@@ -94,13 +104,15 @@ imprimirTablero: ; Parametros: rdi -> direccion del tablero
     ret
 
 realizarMovimientoDelZorro: ; Parametros: rdi -> direccion del tablero
-                            ;             rsi -> coordenada
-                            ;             
+                            ;             sil -> mov horizontal
+                            ;             dl _> mov vertical
 
 
     buscarZorroEnTablero:
         mov qword[dirVec], rdi
-        mov rcx, rsi
+        movsx rcx, sil
+        movsx rdx, dl
+
         mov rax, [dirVec]
 
     proximoCasillero:
@@ -114,10 +126,10 @@ realizarMovimientoDelZorro: ; Parametros: rdi -> direccion del tablero
         mov byte[rax], 32
 
     escribirCasilleroNuevo:
-        imul rcx, [longitudFila]  
-        add rax, rcx
- 
+        imul rdx, [longitudFila]  
         add rax, rdx
+ 
+        add rax, rcx
 
         cmp rax, 0
         je terminarMovimiento
@@ -134,7 +146,7 @@ realizarMovimientoDeOca: ; Parametros: rdi -> direccion del tablero
                          ; Devuelve
                          
     mov qword[dirVec], rdi
-
+    movsx rdx, dl
 obtenerDireccionOca:    
     mov rax, 0
     mov rcx, 0
@@ -173,4 +185,29 @@ ocaMovimientoVertical:
 
 movimientoInvalido:
     mov rax, -1
+    ret
+
+
+obtenerDireccionDeMovimiento: ; Parametros: dil -> opcion elegida validada 
+                              ; sil -> 0 si es oca, 1 si es zorro  
+                         ; Devuelve en al el mov horizontal y en ah el vertical
+
+    sub dil, '0'
+    sub dil, 1
+
+    movsx rdx, dil
+
+    cmp sil, 1
+    je obtenerDireccionDeMovimientoZorro
+
+    mov ah, byte[tablaCoordenadasVerticalesOca + rdx]
+    mov al, byte[tablaCoordenadasHorizontalesOca + rdx]
+
+    ret
+
+    obtenerDireccionDeMovimientoZorro:
+
+        mov ah, byte[tablaCoordenadasVerticalesZorro + rdx]
+        mov al, byte[tablaCoordenadasHorizontalesZorro + rdx]
+
     ret

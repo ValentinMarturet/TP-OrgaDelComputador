@@ -28,6 +28,13 @@
     add     rsp,8
 %endmacro
 
+%macro mImprimirTablero 1
+    mov     rdi, %1
+    sub     rsp, 8
+    call    imprimirTablero
+    add     rsp,8
+%endmacro
+
 global main
 
 ;funciones externas de C
@@ -38,6 +45,10 @@ extern strlen
 extern imprimirTablero
 extern realizarMovimientoDelZorro
 extern realizarMovimientoDeOca
+
+extern validarOpcionMovimientoEsValido
+
+extern obtenerDireccionDeMovimiento
 
 section .data
 
@@ -70,6 +81,8 @@ section .data
     msjJugadaIngresada  db "Jugada ingresada: %c", 10, 0
 
     msjCoordenadaInvalida   db "Coordenada invalida.",10,0
+    msjOpcionInvalida   db "Opcion invalida.",10,0
+
     ;opciones de la partida
     opcionNuevaPartida  db "1",0
     opcionSalirJuego    db "2",0
@@ -87,6 +100,7 @@ section .bss
     auxValidacion   resb 1 ;auxiliar en las opciones de validacion
     filaZorro       resb 1
     columnaZorro    resb 1
+    coordenadaOca resb 3 ; Antes de copiar aca me aseguro que el formato este bien
 
 section .text
 main:
@@ -132,10 +146,7 @@ comienzoNuevaPartida:
     mPrintf     msjComienzoNuevaPartida
 
 principioLoop:
-    mov     rdi, MatrizTablero
-    sub     rsp,8
-    call        imprimirTablero
-    add     rsp,8
+    mImprimirTablero MatrizTablero
 
 ;    sub     rsp, 8
 ;    call    calcularPosicionZorro
@@ -164,23 +175,40 @@ principioLoop:
         mov     al,[opcionSalirJuego3]
         cmp     al,[auxValidacion]
         je      salirDelJuego
+    
+    validarOpcion:
+        mov     dil,[auxValidacion]
+        mov     sil, 1 ; 1 = zorro
 
-    computarMovimiento:
-        sub rsp, 8
-        call        validarMovimientoDelZorro ;Valida el movimiento del zorro, si es un movimiento invalido setea rax en -1.
-        add rsp, 8
+        sub     rsp,8
+        call        validarOpcionMovimientoEsValido
+        add     rsp,8
+
+        cmp al, -1
+        je preguntarPorMovimientoAlZorro 
+
+        mov     dil,[auxValidacion]
+        mov     sil, 1 ; 1 = zorro
+
+        sub     rsp,8
+        call        obtenerDireccionDeMovimiento
+        add     rsp,8
+
+;        sub rsp, 8
+;        call        validarMovimientoDelZorro ;Valida el movimiento del zorro, si es un movimiento invalido setea rax en -1.
+;        add rsp, 8
 
 ;    cmp         rax,-1                     ; Si el movimiento fue invalido, vuelvo a preguntar por movimiento
 ;    jmp     preguntarPorMovimientoAlZorro
     
+    computarMovimiento:
+        mov     rdi, MatrizTablero
+        mov     sil, al
+        mov     dl, ah
 
-    mov     rdi, MatrizTablero
-    mov     rsi, 1
-    mov     rdx, -1
-
-    sub     rsp,8
-    call        realizarMovimientoDelZorro
-    add     rsp,8
+        sub     rsp,8
+        call        realizarMovimientoDelZorro
+        add     rsp,8
 
     ;call        verificaCondicionDeFinDePartida
 
@@ -209,9 +237,16 @@ principioLoop:
         validarCoordenadaOca:
             mStrlen auxIngreso              ;Valido que el input sea 2 caracteres
             cmp     rax, 2
-            je      preguntarPorMovimientoAOca
-        
-            ;Validar que haya una oca, en la coordenada ingresada.
+            jne     coordenadaInvalida
+
+            mov rcx, 3
+            lea rsi, [auxIngreso]
+            lea rdi, [coordenadaOca]
+        rep movsb
+
+            jmp preguntarPorMovimientoAOca
+
+        ;Validar que haya una oca, en la coordenada ingresada.
 
         coordenadaInvalida:
             mPrintf msjCoordenadaInvalida
@@ -239,37 +274,42 @@ principioLoop:
         cmp     al,[auxValidacion]
         je      salirDelJuego
 
-    computarMovimientoOca:
-        sub rsp, 8
-        call        validarMovimientoDeOca ;Valida el movimiento de la oca, si es un movimiento invalido setea rax en -1.
-        add rsp, 8
+    validarOpcionOca:
 
- 
+        mov     dil,[auxValidacion]
+        mov     sil, 0
+
+        sub     rsp,8
+        call        validarOpcionMovimientoEsValido
+        add     rsp,8
+
+        cmp al, -1
+        je preguntarPorMovimientoAOca 
+
+        mov     dil,[auxValidacion]
+        mov     sil, 0 ; 0 = oca
+
+        sub     rsp,8
+        call        obtenerDireccionDeMovimiento
+        add     rsp,8
+
+        ;sub rsp, 8
+        ;call        validarMovimientoDeOca ;Valida el movimiento de la oca, si es un movimiento invalido setea rax en -1.
+        ;add rsp, 8
+
+    computarMovimientoOca: 
 
     ; cmp rax, -1                       ; Verificar si el movimiento de la oca fue invalido
     ;jmp preguntarPorMovimientosOca     ; Vuelvo a preguntar movimiento
 
     mov     rdi, MatrizTablero
-    mov     rsi, coordenadaHardcodeada
-    mov     rdx, 0
+    mov     rsi, coordenadaOca
+    mov     dl, al
      
     sub     rsp,8
     call        realizarMovimientoDeOca
     add     rsp,8
 
-    mov     rdi, MatrizTablero
-    sub     rsp,8
-    call        imprimirTablero
-    add     rsp,8
-
-
-    mov     rdi, MatrizTablero
-    mov     rsi, coordenadaHardcodeada2
-    mov     rdx, 1
-     
-    sub     rsp,8
-    call        realizarMovimientoDeOca
-    add     rsp,8
 
     ;call        verificaCondicionDeFinDePartida
 
