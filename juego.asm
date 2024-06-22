@@ -27,7 +27,8 @@ extern printf
 extern gets
 
 extern imprimirTablero
-
+extern realizarMovimientoDelZorro
+extern realizarMovimientoDeOca
 
 section .data
 
@@ -67,6 +68,9 @@ section .data
     opcionSalirJuego3   db "s",0
 
     turnoActual         db "Z"
+    coordenadaHardcodeada db "D3",0
+    coordenadaHardcodeada2 db "A4",0
+
 
 section .bss
     auxIngreso  resb 20 ;Guarda el ultimo ingreso por teclado
@@ -159,11 +163,18 @@ principioLoop:
 ;    cmp         rax,-1                     ; Si el movimiento fue invalido, vuelvo a preguntar por movimiento
 ;    jmp     preguntarPorMovimientoAlZorro
     
-    mov byte[turnoActual], 'O' ;Si termina el turno del zorro, cambio el turno a la Oca
-    ;call        realizarMovimientoDelZorro
+
+    mov     rdi, MatrizTablero
+    mov     rsi, 1
+    mov     rdx, -1
+
+    sub     rsp,8
+    call        realizarMovimientoDelZorro
+    add     rsp,8
 
     ;call        verificaCondicionDeFinDePartida
 
+    mov byte[turnoActual], 'O' ;Si termina el turno del zorro, cambio el turno a la Oca
     jmp principioLoop
 
 
@@ -192,9 +203,30 @@ principioLoop:
         add rsp, 8
 
 
-    ;call        realizarMovimientoDeOca
     ; cmp rax, -1                       ; Verificar si el movimiento de la oca fue invalido
     ;jmp preguntarPorMovimientosOca     ; Vuelvo a preguntar movimiento
+
+    mov     rdi, MatrizTablero
+    mov     rsi, coordenadaHardcodeada
+    mov     rdx, 0
+     
+    sub     rsp,8
+    call        realizarMovimientoDeOca
+    add     rsp,8
+
+    mov     rdi, MatrizTablero
+    sub     rsp,8
+    call        imprimirTablero
+    add     rsp,8
+
+
+    mov     rdi, MatrizTablero
+    mov     rsi, coordenadaHardcodeada2
+    mov     rdx, 1
+     
+    sub     rsp,8
+    call        realizarMovimientoDeOca
+    add     rsp,8
 
     ;call        verificaCondicionDeFinDePartida
 
