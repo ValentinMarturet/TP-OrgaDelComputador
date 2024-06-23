@@ -50,6 +50,9 @@ extern validarOpcionMovimientoEsValido
 
 extern obtenerDireccionDeMovimiento
 
+extern guardarPartida
+extern cargarPartida
+
 section .data
 
     ;Logica del juego
@@ -62,19 +65,20 @@ section .data
      f6         db   "XX   XX"
 
     ;Mensajes
-    msjInicioDelJuego           db "--EL ZORRO Y LAS OCAS",10,10,"Elija una opcion para jugar",10,"1 - Nueva Partida",10,"2 - Salir del juego",10,0
+    msjInicioDelJuego           db "--EL ZORRO Y LAS OCAS",10,10,"Elija una opcion para jugar",10,"1 - Nueva Partida",10, "2 - Cargar Partida",10, "3 - Salir del juego",10,10,0
     msjComienzoNuevaPartida     db "Usted ha comenzado una nueva partida.",10,0
     msjSalidaDelJuego           db "Saliendo del juego.",10,0
-
+    msgNoExistePartida          db "No se encontro una partida guardada. Comenzando nueva partida...",0
 
     msjErrorDeValidacion        db "No se pudo validar ninguna de las opciones",10,0
 
     msjTurnoZorro               db "<========== Turno zorro. ==========>",10,0
-    msjMovimientosZorro         db "1. arriba", 10, "2. arriba derecha", 10, "3. derecha", 10, "4. abajo derecha", 10, "5. abajo", 10, "6. abajo izquierda", 10, "7. izquierda", 10, "8. arriba izquierda", 10, "S. Salir del juego", 10 ,0
+    msjMovimientosZorro         db "1. arriba", 10, "2. arriba derecha", 10, "3. derecha", 10, "4. abajo derecha", 10, "5. abajo", 10 
+                                db "6. abajo izquierda", 10, "7. izquierda", 10, "8. arriba izquierda", 10, "G. Guardar partida", 10, "S. Salir del juego", 10,10 ,0
 
     msjTurnoOca                 db "<========== Turno Oca ==========>", 10,0
-    msjMovimientosOca           db "1. derecha", 10, "2. abajo", 10, "3. izquierda",10, "4. Elegir otra oca",10,"S. Salir del juego",10,0
-    msjPedirCoordenadaOca       db "Ingresa coordenada de la OCA a mover o 'S' para salir: ",0
+    msjMovimientosOca           db "1. derecha", 10, "2. abajo", 10, "3. izquierda",10, "4. Elegir otra oca",10, "S. Salir del juego",10,0
+    msjPedirCoordenadaOca       db "Ingresa coordenada de la OCA a mover. 'G' para guardar la partida, 'S' para salir: ",0
     msjPedirOpcion              db "Elija una opcion: ", 0
 
     msjCoordenadaInvalida   db "Coordenada invalida.",10,0
@@ -83,15 +87,16 @@ section .data
     msjOcaComida            db "Oca comida! Tienes otro turno!", 10 ,0
     ;opciones de la partida
     opcionNuevaPartida  db "1",0
-    opcionSalirJuego    db "2",0
+    opcionCargarPartida  db "2",0
+    opcionSalirJuego    db "3",0
 
     opcionSalirJuego2   db "S",0
     opcionSalirJuego3   db "s",0
+    opcionGuardarPartida   db "G",0
+
+    msgPartidaGuardadaCorrectamente db "Partida guardada correctamente. Puede restaurarla desde el menu principal",0
 
     turnoActual         db "Z"
-    coordenadaHardcodeada db "D3",0
-    coordenadaHardcodeada2 db "A4",0
-
 
 section .bss
     auxIngreso  resb 20 ;Guarda el ultimo ingreso por teclado
@@ -124,6 +129,10 @@ validarIngreso:
     cmp     al,[auxValidacion]
     je      comienzoNuevaPartida
 
+    mov     al,[opcionCargarPartida]
+    cmp     al,[auxValidacion]
+    je      cargar
+
     mov     al,[opcionSalirJuego]
     cmp     al,[auxValidacion]
     je      salirDelJuego
@@ -131,6 +140,18 @@ validarIngreso:
     mPrintf msjErrorDeValidacion
 
     ret
+
+cargar:
+    mov rdi, MatrizTablero
+    sub rsp, 8
+    call cargarPartida
+    add rsp, 8
+
+    cmp rax, -1
+    jne principioLoop
+
+    mPrintf msgNoExistePartida
+    jmp principioLoop
 
 salirDelJuego:
     mPrintf     msjSalidaDelJuego
@@ -173,7 +194,12 @@ principioLoop:
         mov     al,[opcionSalirJuego3]
         cmp     al,[auxValidacion]
         je      salirDelJuego
-    
+        
+        mov     dil,[auxValidacion] 
+        sub     rsp,8
+        call    verificarSiGuardarPartida
+        add     rsp,8
+
     validarOpcion:
         mov     dil,[auxValidacion]
         mov     sil, 1 ; 1 = zorro
@@ -237,6 +263,11 @@ principioLoop:
         mov     al,[opcionSalirJuego3]
         cmp     al,[auxValidacion]
         je      salirDelJuego
+
+        mov     dil,[auxValidacion] 
+        sub     rsp,8
+        call    verificarSiGuardarPartida
+        add     rsp,8
 
         validarCoordenadaOca:
             mStrlen auxIngreso              ;Valido que el input sea 2 caracteres
@@ -330,4 +361,30 @@ ret
 
 validarMovimientoDeOca:
     
+    ret
+
+verificarSiGuardarPartida:
+    
+    ; Si el input es 'G'o 'g', guardo la partida
+    mov     al,[opcionGuardarPartida]
+    cmp     al, dil
+    je      guardar
+    
+    add     al, 32
+    cmp     al, dil
+    je      guardar
+
+    ret
+guardar:
+    mov rdi, MatrizTablero
+
+    sub     rsp,8
+    call    guardarPartida
+    add     rsp,8
+
+    cmp rax, 0
+    je guardadoCorrectamente
+    ret
+guardadoCorrectamente:
+    mPrintf msgPartidaGuardadaCorrectamente
     ret
