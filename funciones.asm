@@ -203,18 +203,27 @@ obtenerDireccionOca:
     cmp byte[rax], 79 ;No es una oca
     jne movimientoInvalido
 
-    mov byte[rax], 32
+    mov rdi, rax            ;Me guardo la posicion de la oca en otra variable
 
     cmp rdx, 0 ; Si el movimiento horizontal es cero se mueve para adelante
     je ocaMovimientoVertical
 
+ocaMovimientoHorizontal:
     add rax, rdx
+    cmp byte[rax], ' '
+    jne movimientoInvalido
+
+    mov byte[rdi], 32       ;Seteo la casilla actual a vacio
     mov byte[rax], 79
     ret
 
 
 ocaMovimientoVertical:
     add rax, [longitudFila]
+    cmp byte[rax], ' '
+    jne movimientoInvalido
+
+    mov byte[rdi], 32       ;Seteo la casilla actual a vacio
     mov byte[rax], 79
 
     ret

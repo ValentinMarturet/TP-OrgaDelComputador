@@ -1,3 +1,4 @@
 *.o
 *.out
 juego
+saved_game.dat

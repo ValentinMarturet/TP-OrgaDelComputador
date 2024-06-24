@@ -83,7 +83,7 @@ section .data
 
     msjCoordenadaInvalida   db "Coordenada invalida.",10,0
     msjOpcionInvalida   db "Opcion invalida.",10,0
-    msjMovimientoInvalido   db "Movimiento invalido!!!", 10, 0
+    msjMovimientoInvalido   db 10, "Movimiento invalido!!!", 10, 0
     msjOcaComida            db "Oca comida! Tienes otro turno!", 10 ,0
     ;opciones de la partida
     opcionNuevaPartida  db "1",0
@@ -155,10 +155,6 @@ cargar:
 
 salirDelJuego:
     mPrintf     msjSalidaDelJuego
-
-    ; Aca habria que guardar el estado del juego
-    ; Ej:
-    ; call guardarEstado
     ret
 
 comienzoNuevaPartida:
@@ -343,7 +339,8 @@ principioLoop:
     call        realizarMovimientoDeOca
     add     rsp,8
 
-
+    cmp     rax, -1
+    je      movimientoInvalido
     ;call        verificaCondicionDeFinDePartida
 
     mov byte[turnoActual], 'Z'      ;Cuando termina el turno de la Oca, cambia el turno al zorro.
