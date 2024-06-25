@@ -35,6 +35,13 @@
     add     rsp,8
 %endmacro
 
+%macro mValidarFinDePartida 1
+    mov     rdi, %1
+    sub     rsp, 8
+    call    validarFinDePartida
+    add     rsp,8
+%endmacro
+
 global main
 
 ;funciones externas de C
@@ -52,13 +59,22 @@ extern obtenerDireccionDeMovimiento
 
 extern guardarPartida
 extern cargarPartida
+extern validarFinDePartida
 
 section .data
 
     ;Logica del juego
-    MatrizTablero db "XXOOOXX"
-     f1         db   "XXOOOXX"
-     f2         db   "OOOOOOO"
+;    MatrizTablero db "XXOOOXX"
+;     f1         db   "XXOOOXX"
+;     f2         db   "OOOOOOO"
+;     f3         db   "O     O"
+;     f4         db   "O  Z  O"
+;     f5         db   "XX   XX"
+;     f6         db   "XX   XX"
+
+    MatrizTablero db "XX   XX"
+     f1         db   "XX   XX"
+     f2         db   "       "
      f3         db   "O     O"
      f4         db   "O  Z  O"
      f5         db   "XX   XX"
@@ -95,6 +111,8 @@ section .data
     opcionGuardarPartida   db "G",0
 
     msgPartidaGuardadaCorrectamente db "Partida guardada correctamente. Puede restaurarla desde el menu principal",0
+
+    msjGanadorZorro     db "GANADOR: ZORRO!",10,0
 
     turnoActual         db "Z"
 
@@ -163,9 +181,9 @@ comienzoNuevaPartida:
 principioLoop:
     mImprimirTablero MatrizTablero
 
-;    sub     rsp, 8
-;    call    calcularPosicionZorro
-;    add     rsp, 8
+    mValidarFinDePartida    MatrizTablero
+    cmp rax, 0
+    jne  finDelJuego
 
     ;Si el turno actual es de la OCA, salta a preguntarPorMovimientoAOca
     mov al, [turnoActual]
@@ -230,7 +248,6 @@ principioLoop:
         cmp     rax,1
         je      ocaComida
         
-    ;call        verificaCondicionDeFinDePartida
 
     mov byte[turnoActual], 'O' ;Si termina el turno del zorro, cambio el turno a la Oca
     jmp finTurno
@@ -324,9 +341,6 @@ principioLoop:
         call        obtenerDireccionDeMovimiento
         add     rsp,8
 
-        ;sub rsp, 8
-        ;call        validarMovimientoDeOca ;Valida el movimiento de la oca, si es un movimiento invalido setea rax en -1.
-        ;add rsp, 8
 
     computarMovimientoOca: 
 
@@ -341,7 +355,6 @@ principioLoop:
 
     cmp     rax, -1
     je      movimientoInvalido
-    ;call        verificaCondicionDeFinDePartida
 
     mov byte[turnoActual], 'Z'      ;Cuando termina el turno de la Oca, cambia el turno al zorro.
 
@@ -384,4 +397,12 @@ guardar:
     ret
 guardadoCorrectamente:
     mPrintf msgPartidaGuardadaCorrectamente
+    ret
+finDelJuego:
+    cmp rax, 1
+    je ganadorZorro
+    ret
+
+ganadorZorro:
+    mPrintf msjGanadorZorro
     ret

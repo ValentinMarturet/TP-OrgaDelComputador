@@ -1,8 +1,16 @@
 global validarMovimientoEstaDentroDelTablero
 global validarOpcionMovimientoEsValido
+global validarFinDePartida
 
 %macro mPrintf 1
     mov     rdi,%1
+    sub     rsp,8
+    call    printf
+    add     rsp,8
+%endmacro
+%macro mPrintf 2
+    mov     rdi,%1
+    mov     rsi,%2
     sub     rsp,8
     call    printf
     add     rsp,8
@@ -166,3 +174,33 @@ validarOpcionMovimientoEsValido: ; Parametros: dil -> opcion elegida
     
     ret ; Opcion invalida
 
+validarFinDePartida:    ;Parametros: rdi-direccionTablero
+    mov rax, rdi    
+    mov rsi, 0      ;Indice
+    mov rcx, 0      ;Contador de ocas
+
+    loopTablero:
+        cmp rsi, 49
+        je finLoop
+
+        mov rbx, rax
+        add rbx, rsi
+
+        cmp byte[rbx], 'O'
+        jne siguienteCelda
+        inc rcx
+
+    siguienteCelda:    
+        inc rsi
+        jmp loopTablero
+
+    finLoop:
+        cmp rcx, 3
+        jg verificarGanadorOca
+        mov rax, 1
+        ret
+
+    verificarGanadorOca:
+        ;Falta completar
+        mov rax,0
+        ret
