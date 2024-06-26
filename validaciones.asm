@@ -195,7 +195,7 @@ validarFinDePartida:    ;Parametros: rdi-direccionTablero
         jmp loopTablero
 
     finLoop:
-        cmp rcx, 3
+        cmp rcx, 5
         jg verificarGanadorOca
         mov rax, 1
         ret
