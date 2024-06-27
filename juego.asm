@@ -359,6 +359,9 @@ principioLoop:
         call    verificarSiGuardarPartida
         add     rsp,8
 
+        cmp     rax, 1
+        je      preguntarPorCoordenadaOca
+        
         validarCoordenadaOca:
             mStrlen auxIngreso              ;Valido que el input sea 2 caracteres
             cmp     rax, 2
@@ -499,6 +502,7 @@ guardar:
     ret
 guardadoCorrectamente:
     mPrintf msgPartidaGuardadaCorrectamente
+    mov rax, 1
     ret
 finDelJuego:
     cmp rax, 1
