@@ -65,22 +65,6 @@ extern validarFinDePartida
 
 section .data
 
-    ;Logica del juego
-;    MatrizTablero db "XXOOOXX"
-;     f1         db   "XXOOOXX"
-;     f2         db   "OOOOOOO"
-;     f3         db   "O     O"
-;     f4         db   "O  Z  O"
-;     f5         db   "XX   XX"
-;     f6         db   "XX   XX"
-
-    MatrizTablero db "XX   XX"
-     f1         db   "XX   XX"
-     f2         db   "       "
-     f3         db   "O     O"
-     f4         db   "O  Z  O"
-     f5         db   "XX   XX"
-     f6         db   "XX   XX"
 
     ;Mensajes
     msjInicioDelJuego           db "--EL ZORRO Y LAS OCAS",10,10,"Elija una opcion para jugar",10,"1 - Nueva Partida",10, "2 - Cargar Partida",10, "3 - Salir del juego",10,10,0
@@ -117,6 +101,48 @@ section .data
     msjGanadorZorro     db "GANADOR: ZORRO! ^•ﻌ•^ ",10,0
     msjGanadorOcas     db "GANADOR  OCAS ( •ө• ) ( •ө• ) ( •ө• )!",10,0
 
+    msjEstadisticasZorro    db "El zorro realizo los siguientes movimientos:",10,0
+    formatoArriba     db "Arriba: %hhi",10,0
+    formatoArrDer     db "Arriba-derecha: %hhi",10,0
+    formatoDerecha     db "Derecha: %hhi",10,0
+    formatoAbajDer     db "Abajo-derecha: %hhi",10,0
+    formatoAbajo     db "Abajo: %hhi",10,0
+    formatoAbajIzq     db "Abajo-izquierda: %hhi",10,0
+    formatoIzquierda     db "izquierda: %hhi",10,0
+    formatoArrIzq     db "Arriba-izquierda: %hhi",10,0
+
+    formatoOcasComidas  db "El zorro comio %hhi ocas",10,0
+
+
+    ;Logica del juego
+;    MatrizTablero db "XXOOOXX"
+;     f1         db   "XXOOOXX"
+;     f2         db   "OOOOOOO"
+;     f3         db   "O     O"
+;     f4         db   "O  Z  O"
+;     f5         db   "XX   XX"
+;     f6         db   "XX   XX"
+
+    ; MatrizTablero db "XX   XX"
+    ;  f1         db   "XX   XX"
+    ;  f2         db   "       "
+    ;  f3         db   "O     O"
+    ;  f4         db   "O  Z  O"
+    ;  f5         db   "XX   XX"
+    ;  f6         db   "XX   XX"
+
+    MatrizTablero db "XX   XX"
+    f1         db    "XX   XX"
+    f2         db    "      O"
+    f3         db    "O   O O"
+    f4         db    "O  ZO O"
+    f5         db    "XX   XX"
+    f6         db    "XX   XX"
+
+
+    
+    estadisticasZorro   db 0,0,0,0,0,0,0,0
+    ocasComidas         db 0
 
     turnoActual         db "Z"
 
@@ -130,6 +156,9 @@ section .bss
 
     auxDesplazamientoVertical resb 1
     auxDesplazamientoHorizontal resb 1
+
+    auxEstadoDeMovimiento resq 1
+    auxDireccionMovimiento resb 1
 
 section .text
 main:
@@ -207,6 +236,7 @@ principioLoop:
         mov     al, [auxIngreso]
         mov     [auxValidacion],al
 
+
         ; Si el input es 'S', salgo del juego
         mov     al,[opcionSalirJuego2]
         cmp     al,[auxValidacion]
@@ -277,6 +307,18 @@ principioLoop:
 
         cmp     rax, -1
         je      movimientoInvalido
+        ;Si el movimiento es valido, agrego un movimiento en la direccion correspondiente del vector de estadisticas del zorro
+
+        mov     qword[auxEstadoDeMovimiento],rax
+
+        mov     rax,0
+        mov     al,byte[auxValidacion]
+        sub     al,"0"
+        dec     al
+        lea     rbx,[estadisticasZorro + rax]
+        inc     byte[rbx]
+
+        mov     rax,qword[auxEstadoDeMovimiento]
 
         cmp     rax,1
         je      ocaComida
@@ -286,6 +328,7 @@ principioLoop:
     jmp finTurno
     
     ocaComida:
+        inc     byte[ocasComidas]
         mPrintf msjOcaComida
 
     finTurno:
@@ -441,7 +484,51 @@ finDelJuego:
 
 ganadorZorro:
     mPrintf msjGanadorZorro
+
+    sub     rsp,8
+    call    imprimirEstadisticasZorro
+    add     rsp,8
+
     ret
 ganadorOcas:
     mPrintf msjGanadorOcas
+
+    sub     rsp,8
+    call    imprimirEstadisticasZorro
+    add     rsp,8
+
+    ret
+
+
+imprimirEstadisticasZorro:
+    mPrintf msjEstadisticasZorro
+
+    mov     rax,0
+    mov     al,byte[estadisticasZorro]
+    mPrintf formatoArriba,rax
+
+    mov     al,byte[estadisticasZorro+1]
+    mPrintf formatoArrDer,rax
+
+    mov     al,byte[estadisticasZorro+2]
+    mPrintf formatoDerecha,rax
+
+    mov     al,byte[estadisticasZorro+3]
+    mPrintf formatoAbajDer,rax
+
+    mov     al,byte[estadisticasZorro+4]
+    mPrintf formatoAbajo,rax
+
+    mov     al,byte[estadisticasZorro+5]
+    mPrintf formatoAbajIzq,rax
+
+    mov     al,byte[estadisticasZorro+6]
+    mPrintf formatoIzquierda,rax
+
+    mov     al,byte[estadisticasZorro+7]
+    mPrintf formatoArrIzq,rax
+
+    mov     al,byte[ocasComidas]
+    mPrintf formatoOcasComidas, rax
+
     ret
