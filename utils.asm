@@ -34,7 +34,7 @@ cargarPartida: ; Parametros: rdi ->  direccion del tablero
 	mov     [handleArchivo],rax
 
     mov     rdi,[tempTableroDir]    
-    mov     rsi,49                 
+    mov     rsi,59                 
     mov     rdx,1                   
 	mov		rcx,[handleArchivo]    
 	sub		rsp,8  
@@ -56,7 +56,7 @@ guardarPartida: ; Parametros: rdi ->  direccion del tablero
 	mov     [handleArchivo],rax
 
     mov     rdi,[tempTableroDir]    
-    mov     rsi,49                 
+    mov     rsi,59                 
     mov     rdx,1                   
 	mov		rcx,[handleArchivo]    
 	sub		rsp,8  
