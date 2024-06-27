@@ -5,6 +5,8 @@ global realizarMovimientoDeOca
 
 global obtenerDireccionDeMovimiento
 
+global buscarZorroEnTablero
+
 %macro mprintf 1
     mov     rdi,%1
     sub     rsp,8
@@ -19,7 +21,7 @@ global obtenerDireccionDeMovimiento
     add     rsp,8
 %endmacro
 extern printf
-
+extern validarMovimientoEstaDentroDelTablero
 section .data
     msgCoordenadasColumna db 10,"   A B C D E F G",10,0  
     formatoElemento db "%c ",0
@@ -48,7 +50,10 @@ section .bss
     tableroOffset resq 1
 
     auxbyte2long resq 1
-
+    auxiliarProximaCelda resq 1
+    posicionZorro   resq 1
+    auxDesplazamientoVertical      resb 1
+    auxDesplazamientoHorizontal    resb 1
 section .text
 
 imprimirTablero: ; Parametros: rdi -> direccion del tablero
@@ -103,27 +108,37 @@ imprimirTablero: ; Parametros: rdi -> direccion del tablero
 
     ret
 
-realizarMovimientoDelZorro: ; Parametros: rdi -> direccion del tablero
-                            ;             sil -> mov horizontal
-                            ;             dl _> mov vertical
+buscarZorroEnTablero: ; Parametros: rdi -> direccion del tablero
+                            ; Devuelve en rax la direccion en memoria del zorro:
+
+        mov rax, [dirVec]
+
+    proximoCasillero:                           ;Guarda en rax la posicion del zorro
+        cmp     byte[rax], 90
+        je      buscarZorroEnTableroSalir
+        inc     rax
+        jmp     proximoCasillero
+buscarZorroEnTableroSalir:
+    ret
+
+realizarMovimientoDelZorro: ;Parametros: rdi -> direccion tablero
+                            ;             rsi -> direccion zorro
+                            ;             dl -> mov horizontal
+                            ;             dh _> mov vertical
                             ; Devuelve:
                             ; -1 si fallo
                             ; 0 si se movio 
                             ; 1 si comio una oca
 
-    buscarZorroEnTablero:
         mov qword[dirVec], rdi
-        movsx rcx, sil
-        movsx rdx, dl
+        mov qword[posicionZorro], rsi
+        mov  byte[auxDesplazamientoHorizontal], dl
+        mov byte[auxDesplazamientoVertical], dh
 
-        mov rax, [dirVec]
+        mov rax, [posicionZorro]
+        movsx   rcx, byte[auxDesplazamientoHorizontal]
+        movsx   rdx, byte[auxDesplazamientoVertical]
         imul rdx, [longitudFila]            ;Desplazamiento filas
-
-    proximoCasillero:                           ;Guarda en rax la posicion del zorro
-        cmp     byte[rax], 90
-        je      verificarSiHayOca
-        inc     rax ; asumiendo longitud elemento = 1
-        jmp     proximoCasillero
 
     verificarSiHayOca:
         mov     r10b, 0                         ;Variable para luego ver si se comio a una oca
@@ -140,9 +155,26 @@ realizarMovimientoDelZorro: ; Parametros: rdi -> direccion del tablero
         jmp     escribirCasilleroActual
 
     validarSiguienteCelda:
-        mov     r9, r8
+        mov     rax, r8         
+        sub     rax, [dirVec] 
+        mov     rdi, rax
+        movsx   rsi, byte[auxDesplazamientoHorizontal]
+        movsx   rdx, byte[auxDesplazamientoVertical]
+
+        sub     rsp,8
+        call        validarMovimientoEstaDentroDelTablero
+        add     rsp,8
+
+        cmp rax, 1
+        jne movimientoInvalido
+
+        mov       r9, r8
+        movsx     rcx, byte[auxDesplazamientoHorizontal]
+        movsx     rdx, byte[auxDesplazamientoVertical]
+
+        imul    rdx, 7  
         add     r9, rdx
-        add     r9, rcx
+        add     r9, rcx        
         
         cmp     byte[r9], ' '
         jne     movimientoInvalido
@@ -150,8 +182,8 @@ realizarMovimientoDelZorro: ; Parametros: rdi -> direccion del tablero
         mov     r10b, 1                     ;Guardo 1 si se comio una oca
 
     escribirCasilleroActual:
-
-        mov byte[rax], 32
+        mov rax, [posicionZorro]
+        mov byte[rax], ' '
 
     escribirCasilleroNuevo:
         cmp r10b, 1
@@ -166,10 +198,7 @@ realizarMovimientoDelZorro: ; Parametros: rdi -> direccion del tablero
         add rax, rdx                         
         add rax, rcx
 
-        cmp rax, 0
-        je terminarMovimiento
-
-        mov byte[rax], 90
+        mov byte[rax], 'Z'
         
 
     terminarMovimiento:

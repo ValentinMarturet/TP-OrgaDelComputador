@@ -50,8 +50,10 @@ extern gets
 extern strlen
 
 extern imprimirTablero
+extern buscarZorroEnTablero
 extern realizarMovimientoDelZorro
 extern realizarMovimientoDeOca
+extern validarMovimientoEstaDentroDelTablero
 
 extern validarOpcionMovimientoEsValido
 
@@ -84,7 +86,7 @@ section .data
     msjInicioDelJuego           db "--EL ZORRO Y LAS OCAS",10,10,"Elija una opcion para jugar",10,"1 - Nueva Partida",10, "2 - Cargar Partida",10, "3 - Salir del juego",10,10,0
     msjComienzoNuevaPartida     db "Usted ha comenzado una nueva partida.",10,0
     msjSalidaDelJuego           db "Saliendo del juego.",10,0
-    msgNoExistePartida          db "No se encontro una partida guardada. Comenzando nueva partida...",0
+    msgNoExistePartida          db "No se encontro una partida guardada. Comenzando nueva partida...",10,0
 
     msjErrorDeValidacion        db "No se pudo validar ninguna de las opciones",10,0
 
@@ -110,9 +112,11 @@ section .data
     opcionSalirJuego3   db "s",0
     opcionGuardarPartida   db "G",0
 
-    msgPartidaGuardadaCorrectamente db "Partida guardada correctamente. Puede restaurarla desde el menu principal",0
+    msgPartidaGuardadaCorrectamente db "Partida guardada correctamente. Puede restaurarla desde el menu principal",10,0
 
-    msjGanadorZorro     db "GANADOR: ZORRO!",10,0
+    msjGanadorZorro     db "GANADOR: ZORRO! ^•ﻌ•^ ",10,0
+    msjGanadorOcas     db "GANADOR  OCAS ( •ө• ) ( •ө• ) ( •ө• )!",10,0
+
 
     turnoActual         db "Z"
 
@@ -122,6 +126,10 @@ section .bss
     filaZorro       resb 1
     columnaZorro    resb 1
     coordenadaOca resb 3 ; Antes de copiar aca me aseguro que el formato este bien
+    posicionZorro resq 1;
+
+    auxDesplazamientoVertical resb 1
+    auxDesplazamientoHorizontal resb 1
 
 section .text
 main:
@@ -225,6 +233,7 @@ principioLoop:
         cmp al, -1
         je preguntarPorMovimientoAlZorro 
 
+    obtenerDireccion:
         mov     dil,[auxValidacion]
         mov     sil, 1 ; 1 = zorro
 
@@ -232,11 +241,35 @@ principioLoop:
         call        obtenerDireccionDeMovimiento
         add     rsp,8
 
-    
+        mov [auxDesplazamientoHorizontal], al
+        mov [auxDesplazamientoVertical], ah
+
+    validarMovimientoEsValido:
+        mov     rdi, MatrizTablero
+
+        sub     rsp,8
+        call        buscarZorroEnTablero
+        add     rsp,8        
+
+        mov [posicionZorro], rax
+
+        sub     rax, MatrizTablero 
+        mov     rdi, rax
+        movsx   rsi, byte[auxDesplazamientoHorizontal]
+        movsx   rdx, byte[auxDesplazamientoVertical]
+
+        sub     rsp,8
+        call        validarMovimientoEstaDentroDelTablero
+        add     rsp,8        
+
+        cmp rax, 1
+        jne movimientoInvalido
+
     computarMovimiento:
         mov     rdi, MatrizTablero
-        mov     sil, al
-        mov     dl, ah
+        mov     rsi, [posicionZorro]
+        mov     dl, [auxDesplazamientoHorizontal]
+        mov     dh, [auxDesplazamientoVertical]
 
         sub     rsp,8
         call        realizarMovimientoDelZorro
@@ -401,8 +434,14 @@ guardadoCorrectamente:
 finDelJuego:
     cmp rax, 1
     je ganadorZorro
+    cmp rax, -1
+    je ganadorOcas
+    
     ret
 
 ganadorZorro:
     mPrintf msjGanadorZorro
+    ret
+ganadorOcas:
+    mPrintf msjGanadorOcas
     ret
