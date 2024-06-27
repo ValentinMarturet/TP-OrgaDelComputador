@@ -58,6 +58,7 @@ extern validarMovimientoEstaDentroDelTablero
 extern validarOpcionMovimientoEsValido
 
 extern obtenerDireccionDeMovimiento
+extern obtenerDireccionOca
 
 extern guardarPartida
 extern cargarPartida
@@ -416,14 +417,39 @@ principioLoop:
         sub     rsp,8
         call        obtenerDireccionDeMovimiento
         add     rsp,8
+        
+        mov [auxDesplazamientoHorizontal], al
+        mov [auxDesplazamientoVertical], ah
 
+    validarMovimientoOcaEsValido:
+        mov     rdi, MatrizTablero  
+        mov     rsi, coordenadaOca
+
+        sub rsp, 8
+        call obtenerDireccionOca
+        add rsp, 8
+
+        cmp rax, -1
+        je  movimientoInvalido
+
+        sub     rax, MatrizTablero 
+        mov     rdi, rax
+        movsx   rsi, byte[auxDesplazamientoHorizontal]
+        movsx   rdx, byte[auxDesplazamientoVertical]
+
+        sub     rsp,8
+        call        validarMovimientoEstaDentroDelTablero
+        add     rsp,8        
+
+        cmp rax, 1
+        jne movimientoInvalido
 
     computarMovimientoOca: 
 
 
     mov     rdi, MatrizTablero
     mov     rsi, coordenadaOca
-    mov     dl, al
+    mov     dl, [auxDesplazamientoHorizontal]
      
     sub     rsp,8
     call        realizarMovimientoDeOca

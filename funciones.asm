@@ -6,7 +6,7 @@ global realizarMovimientoDeOca
 global obtenerDireccionDeMovimiento
 
 global buscarZorroEnTablero
-
+global obtenerDireccionOca
 %macro mprintf 1
     mov     rdi,%1
     sub     rsp,8
@@ -209,32 +209,20 @@ realizarMovimientoDeOca: ; Parametros: rdi -> direccion del tablero
                          ;             rsi -> coordenada de la oca
                          ;             rdx -> direccion horizontal
                          ; Devuelve
-                         
+
     mov qword[dirVec], rdi
     movsx rdx, dl
-obtenerDireccionOca:    
-    mov rax, 0
-    mov rcx, 0
-    
-    mov al, byte[rsi]
-    sub rax, 65
 
-    inc rsi
-    mov cl, byte[rsi]
+    sub rsp, 8
+    call obtenerDireccionOca    ; rax = direccionOca, -1 si no habia oca
+    add rsp, 8
 
-    sub rcx, 49
-    imul rcx, [longitudFila]
+    cmp rax, -1
+    je movimientoInvalido
 
-    add rax, rcx
-    
-    add rax, [dirVec]
+    mov rdi, rax                ; Me guardo la direccion de la oca en otra variable
 
-    cmp byte[rax], 79 ;No es una oca
-    jne movimientoInvalido
-
-    mov rdi, rax            ;Me guardo la posicion de la oca en otra variable
-
-    cmp rdx, 0 ; Si el movimiento horizontal es cero se mueve para adelante
+    cmp rdx, 0
     je ocaMovimientoVertical
 
 ocaMovimientoHorizontal:
@@ -256,6 +244,32 @@ ocaMovimientoVertical:
     mov byte[rax], 79
 
     ret
+
+
+obtenerDireccionOca:            ; rdi-> Direccion del tablero
+                                ; rsi-> coordenada de la oca
+    mov qword[dirVec], rdi
+    mov rax, 0
+    mov rcx, 0
+    
+    mov al, byte[rsi]
+    sub rax, 65
+
+    inc rsi
+    mov cl, byte[rsi]
+
+    sub rcx, 49
+    imul rcx, [longitudFila]
+
+    add rax, rcx
+    
+    add rax, [dirVec]
+
+    cmp byte[rax], 79 ;No es una oca
+    jne movimientoInvalido
+    
+    ret            
+
 
 movimientoInvalido:
     mov rax, -1
