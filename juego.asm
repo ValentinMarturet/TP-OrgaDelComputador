@@ -347,6 +347,10 @@ principioLoop:
         mov     al, [auxIngreso]
         mov     [auxValidacion],al
 
+        mStrlen auxIngreso
+        cmp     rax, 1
+        jg      validarCoordenadaOca
+
         ; Si el input es 'S', salgo del juego
         mov     al,[opcionSalirJuego2]
         cmp     al,[auxValidacion]
