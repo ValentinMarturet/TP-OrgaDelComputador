@@ -30,9 +30,7 @@ section .data
     formatoString db "%s",10,0
     msgSaltoDeLinea db "",10,0
     
-    longitudElemento dq 1
     longitudFila dq 7
-    longitudColumna dq 7
 
     caracterZorro db 90 
     caracterEspacio db 32
@@ -45,61 +43,50 @@ section .data
 
 section .bss
     dirVec      resq   1
-    indiceColumna resq 1
-    indiceFila resq 1
+    indiceFila resb 1
     tableroOffset resq 1
-
-    auxbyte2long resq 1
-    auxiliarProximaCelda resq 1
     posicionZorro   resq 1
     auxDesplazamientoVertical      resb 1
     auxDesplazamientoHorizontal    resb 1
+
 section .text
 
 imprimirTablero: ; Parametros: rdi -> direccion del tablero
     mov qword[dirVec], rdi
 
     mprintf msgCoordenadasColumna ; Imprimo la primera linea
+    mov qword[tableroOffset], 0
 
-    mov qword[indiceFila],0
-    mov qword[indiceColumna],0
+    esMultiploDe7: ; Si el indice es multiplo de 7, imprimo el numero de fila y un salto de liena
+        mov ax, word[tableroOffset]
+        mov dh, 7
+        div dh
 
-    imprimirFila:
-        cmp qword[indiceFila], 7; Verifico condicion de corte del loop externo
+        cmp ah, 0
+        je imprimirNumeroDeFila
+
+    imprimirElemento:
+        mov rax, [dirVec]
+        add rax, [tableroOffset]
+        
+        mprintf formatoElemento, [rax]
+
+        inc qword[tableroOffset]
+        cmp qword[tableroOffset], 49; Verifico condicion de corte del loop
         je finImprimirTablero
 
+        jmp esMultiploDe7 ;avanzo en el loop interno
+
+    imprimirNumeroDeFila:
+        mov [indiceFila], al
         mprintf msgSaltoDeLinea
 
-        mov rax,qword[indiceFila] ; Imprimo el numero de fila
+        movsx rax,byte[indiceFila] ; Imprimo el numero de fila
         inc rax
         mprintf formatoFila, rax
+        
+        jmp imprimirElemento
 
-        mov rax,qword[indiceFila] 
-        imul rax, qword[longitudFila] 
-        mov [tableroOffset], rax ;me guardo cuanto tengo que desplazarme para llegar a esta
-
-        mov qword[indiceColumna],0 ;reseteo indice de columna e incremento el de fila
-        inc qword[indiceFila]
-
-    imprimirElemento: 
-        cmp qword[indiceColumna], 7; Verifico condicion de corte del loop interno
-        je imprimirFila;  ;avanzo en el loop externo
-
-        mov rbx, qword[dirVec]; Me situo al inicio del tablero
-
-
-        mov rax,qword[indiceColumna] ;
-        imul rax, qword[longitudElemento] ;me desplazo de columna
-        add rcx,rax
-
-        add rax, [tableroOffset] ;sumo los desplazamientos
-        add rbx, rax ;me posicione en la matriz
-
-
-        mprintf formatoElemento, [rbx]
-
-        inc qword[indiceColumna]
-        jmp imprimirElemento ;avanzo en el loop interno
 
     finImprimirTablero:
 

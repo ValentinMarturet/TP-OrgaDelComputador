@@ -76,12 +76,15 @@ section .data
     msjErrorDeValidacion        db "No se pudo validar ninguna de las opciones",10,0
 
     msjTurnoZorro               db "<========== Turno zorro. ==========>",10,0
-    msjMovimientosZorro         db "1. arriba", 10, "2. arriba derecha", 10, "3. derecha", 10, "4. abajo derecha", 10, "5. abajo", 10 
-                                db "6. abajo izquierda", 10, "7. izquierda", 10, "8. arriba izquierda", 10, "G. Guardar partida", 10, "S. Salir del juego", 10,10 ,0
+    msjMovimientosZorro         db "1. arriba", "     ", "2. arriba derecha", 10
+                                db "3. derecha", "    ", "4. abajo derecha", 10
+                                db "5. abajo", "      ", "6. abajo izquierda", 10
+                                db "7. izquierda", "  ", "8. arriba izquierda", 10,10
+                                db "G. Guardar partida", 10, "S. Salir del juego", 10,10 ,0
 
     msjTurnoOca                 db "<========== Turno Oca ==========>", 10,0
     msjMovimientosOca           db "1. derecha", 10, "2. abajo", 10, "3. izquierda",10, "4. Elegir otra oca",10, "S. Salir del juego",10,0
-    msjPedirCoordenadaOca       db "Ingresa coordenada de la OCA a mover. 'G' para guardar la partida, 'S' para salir: ",0
+    msjPedirCoordenadaOca       db "Ingresa coordenada de la OCA a mover. 'G' para guardar la partida, 'S' para salir: ",10,0
     msjPedirOpcion              db "Elija una opcion: ", 0
 
     msjCoordenadaInvalida   db "Coordenada invalida.",10,0
@@ -116,13 +119,13 @@ section .data
 
 
     ;Logica del juego
-;    MatrizTablero db "XXOOOXX"
-;     f1         db   "XXOOOXX"
-;     f2         db   "OOOOOOO"
-;     f3         db   "O     O"
-;     f4         db   "O  Z  O"
-;     f5         db   "XX   XX"
-;     f6         db   "XX   XX"
+    MatrizTablero db "XXOOOXX"
+     f1         db   "XXOOOXX"
+     f2         db   "OOOOOOO"
+     f3         db   "O     O"
+     f4         db   "O  Z  O"
+     f5         db   "XX   XX"
+     f6         db   "XX   XX"
 
     ; MatrizTablero db "XX   XX"
     ;  f1         db   "XX   XX"
@@ -132,13 +135,13 @@ section .data
     ;  f5         db   "XX   XX"
     ;  f6         db   "XX   XX"
 
-    MatrizTablero db "XX   XX"
-    f1         db    "XX   XX"
-    f2         db    "      O"
-    f3         db    "O   O O"
-    f4         db    "O  ZO O"
-    f5         db    "XX   XX"
-    f6         db    "XX   XX"
+    ; MatrizTablero db "XX   XX"
+    ; f1         db    "XX   XX"
+    ; f2         db    "      O"
+    ; f3         db    "O   O O"
+    ; f4         db    "O  ZO O"
+    ; f5         db    "XX   XX"
+    ; f6         db    "XX   XX"
 
 
     
